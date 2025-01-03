@@ -67,12 +67,18 @@ void *handle_client(void *arg){
         if(strcmp(buffer, "/list") == 0){
             pthread_mutex_lock(c_struct.lock);
             memset(buffer, 0, sizeof(buffer));
+            char c_size[100] = {0};
+            snprintf(c_size, sizeof(c_size), "%d", *c_struct.client_list_size - 1);
+            strcat(buffer, c_size);
             for(int i = 0; i < *c_struct.client_list_size; i++){
                 char c_str[100] = {0};
                 struct peer tmp_peer = (*c_struct.client_list)[i];
-                printf("CLIENT %d\n", tmp_peer.id);
-                snprintf(c_str, sizeof(c_str), "id: %d, ip: %s, port: %d\n", tmp_peer.id, tmp_peer.ip, tmp_peer.port);
-                strcat(buffer, c_str);
+                if(c_struct.client_s != tmp_peer.id){
+                    printf("CLIENT %d\n", tmp_peer.id);
+                    //snprintf(c_str, sizeof(c_str), "id: %d, ip: %s, port: %d\n", tmp_peer.id, tmp_peer.ip, tmp_peer.port);
+                    snprintf(c_str, sizeof(c_str), ",%d,%s,%d", tmp_peer.id, tmp_peer.ip, tmp_peer.port);
+                    strcat(buffer, c_str);
+                }
             }
             pthread_mutex_unlock(c_struct.lock);
             send(c_struct.client_s, buffer, sizeof(buffer), 0);
